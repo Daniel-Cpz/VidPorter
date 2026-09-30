@@ -29,6 +29,7 @@
       "*.js",
       "*.html",
       "*.css",
+      "icon.png",
       "lib/**",
       "README.md",
       "LICENSE",
@@ -36,6 +37,7 @@
     ],
     "win": {
       "target": ["nsis", "portable"],
+      "icon": "icon.ico",
       "signAndEditExecutable": true
     },
     "nsis": {
@@ -44,6 +46,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "VidPorter",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
       "artifactName": "VidPorter-v${version}-Windows-x64-Setup.${ext}"
     },
     "portable": {

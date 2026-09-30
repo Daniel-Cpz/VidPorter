@@ -137,7 +137,7 @@ app.whenReady().then(async () => {
   browserSession.setUserAgent(browserSession.getUserAgent().replace(/\sElectron\/\S+/g, '').replace(/\s(?:streamcatch-browser|StreamCatch)\/\S+/gi, ''));
   browserSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
   win = new BrowserWindow({width: 1480, height: 940, minWidth: 1100, minHeight: 720,
-    title: 'VidPorter '+app.getVersion(), backgroundColor: '#f4f6fa',
+    title: 'VidPorter '+app.getVersion(), icon: path.join(__dirname, 'icon.png'), backgroundColor: '#f4f6fa',
     webPreferences: {preload: path.join(__dirname, 'preload.cjs'), nodeIntegration: false, contextIsolation: true, sandbox: true}});
   installCapture();
   let ffmpeg = require('ffmpeg-static');

@@ -26,7 +26,7 @@ VidPorter 是基于 Electron 和 Chromium 的桌面视频下载软件。在内�
 
 ### 安装与 Windows 发布版
 
-Windows x64 安装程序为 `VidPorter-v1.0.0-Windows-x64-Setup.exe`，是可直接运行的 `.exe` 安装包，会创建 VidPorter 开始菜单入口和桌面快捷方式。另有无需安装的 `VidPorter-v1.0.0-Windows-x64-Portable.exe`。构建产物位于本地 `dist/`，不提交到 Git；发布后可从 [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases) 下载。安装包尚未进行代码签名，Windows 可能显示发布者提示。
+Windows x64 安装程序为 `VidPorter-v1.0.0-Windows-x64-Setup.exe`，是可直接运行的 `.exe` 安装包，会创建 VidPorter 开始菜单入口和桌面快捷方式。另有无需安装的 `VidPorter-v1.0.0-Windows-x64-Portable.exe`。请从 [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases/tag/v1.0.0) 下载。构建产物位于本地 `dist/`，不提交到 Git。安装包尚未进行代码签名，Windows 可能显示发布者提示。
 
 ### 开发与要求
 
@@ -57,7 +57,7 @@ npm run build
 
 ### 免责声明
 
-请只下载你有权保存的媒体。VidPorter 不会绕过 DRM、网站限制或访问控制。本地任务记录可能包含资源网址和 Referer，请妥善保护应用数据。
+请只下载你有权保存的媒体，并遵守相关网站条款及适用法律。VidPorter 不会绕过 DRM、网站限制或访问控制，也不保证适用于任何特定网站。VidPorter 与被访问的网站无关联。本地任务记录可能包含资源网址和 Referer，请妥善保护应用数据。
 
 ### 许可证
 
@@ -85,7 +85,7 @@ Screenshots have not yet been added.
 
 ### Installation and Windows Release
 
-The Windows x64 installer is `VidPorter-v1.0.0-Windows-x64-Setup.exe`, a runnable `.exe` setup program that creates VidPorter Start menu and desktop shortcuts. `VidPorter-v1.0.0-Windows-x64-Portable.exe` runs without installation. Build outputs are kept locally in `dist/`, outside Git history. Once published, download them from [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases). The binaries are not code signed, so Windows may display a publisher warning.
+The Windows x64 installer is `VidPorter-v1.0.0-Windows-x64-Setup.exe`, a runnable `.exe` setup program that creates VidPorter Start menu and desktop shortcuts. `VidPorter-v1.0.0-Windows-x64-Portable.exe` runs without installation. Download them from [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases/tag/v1.0.0). Build outputs are kept locally in `dist/`, outside Git history. The binaries are not code signed, so Windows may display a publisher warning.
 
 ### Development and Requirements
 
@@ -116,7 +116,7 @@ The `version` field in `package.json` is the single application version source, 
 
 ### Disclaimer
 
-Download only media you have permission to save. VidPorter does not bypass DRM, site restrictions, or access controls. Local task data may contain resource URLs and Referer values; keep your application data private.
+Download only media you have permission to save, and follow applicable law and site terms. VidPorter does not bypass DRM, site restrictions, or access controls, and compatibility with any particular site is not guaranteed. VidPorter is not affiliated with the sites you visit. Local task data may contain resource URLs and Referer values; keep your application data private.
 
 ### License
 

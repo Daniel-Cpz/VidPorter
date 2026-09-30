@@ -1,0 +1,53 @@
+{
+  "name": "vidporter",
+  "version": "1.0.0",
+  "description": "VidPorter — Move videos anywhere.",
+  "author": "Daniel-Cpz",
+  "license": "MIT",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "build": "electron-builder --win nsis portable --x64"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0"
+  },
+  "devDependencies": {
+    "electron": "^42.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "local.vidporter.app",
+    "productName": "VidPorter",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**"
+    ],
+    "files": [
+      "*.cjs",
+      "*.js",
+      "*.html",
+      "*.css",
+      "lib/**",
+      "README.md",
+      "LICENSE",
+      "node_modules/**"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "VidPorter",
+      "artifactName": "VidPorter-v${version}-Windows-x64-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "VidPorter-v${version}-Windows-x64-Portable.${ext}"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'">
+<title>VidPorter</title><link rel="stylesheet" href="style.css"></head><body>
+<aside><div class="brand">VidPorter<span id="appVersion">正在读取版本…</span></div>
+<button id="browseTab" class="nav active">网页浏览</button><button id="tasksTab" class="nav">下载任务 <span id="count">0</span></button>
+<div id="taskSubnav" class="task-subnav" hidden><button id="pendingTasks" class="nav subnav">进行中／未完成 <span id="pendingCount">0</span></button><button id="completedTasks" class="nav subnav">已完成 <span id="completedCount">0</span></button></div>
+<div class="rail-bottom"><button id="openSettings">设置</button></div></aside>
+<main><header><button id="back">←</button><button id="forward">→</button><button id="reload">刷新</button>
+<input id="address" placeholder="输入网页网址，在页面中点击播放视频"><button id="navigate" class="primary">打开网页</button></header>
+<div class="tab-strip"><div id="browserTabs" aria-label="网页标签栏"></div><div id="downloadToast" class="download-toast" hidden><span role="status" aria-live="polite">已经添加到下载列表</span><button id="closeDownloadToast" aria-label="关闭提示" type="button">×</button></div></div><section id="browse"><div id="browserSlot"><div class="welcome"><small>Move videos anywhere.</small><h1>打开网页，<br>发现视频。</h1><p>在上方输入网址并播放视频。<br>成功返回的媒体资源会出现在右侧。</p></div></div>
+<div class="capture"><div class="heading"><h2>视频资源 <small id="resourceCount">0</small></h2><button id="clear">清空</button></div>
+<div class="filters"><label>隐藏小于 <input id="minimum" type="number" min="0" step="1" value="0"> MB</label><label><input id="unknown" type="checkbox"> 隐藏未知大小</label></div>
+<div class="source-filter"><label for="sourceSelect">来源域名</label>
+<select id="sourceSelect"><option value="">从已识别来源中选择并添加…</option></select>
+<input id="sourceText" placeholder="输入域名或网址，多个用逗号分隔" aria-label="手动输入来源">
+<label><input id="sourceSubdomains" type="checkbox"> 包含子域名</label>
+<div><button id="applySources">应用筛选</button> <button id="resetSources">全部来源</button></div>
+<small id="sourceStatus">当前：全部来源</small></div>
+<details class="keyword-filter"><summary>网址关键词筛选</summary><input id="urlInclude" placeholder="只显示包含：如 720、1080（逗号分隔）" aria-label="包含关键词"><input id="urlExclude" placeholder="隐藏包含：如 trailer、preview" aria-label="排除关键词"><div><button id="applyKeywords">应用关键词</button> <button id="clearKeywords">清除关键词</button></div><small>不区分大小写；包含任一词且不含任何排除词。</small></details>
+<p class="muted">HLS 大小未知；仅列出成功响应的资源。</p><div id="resources" class="resource-list"></div>
+<div class="actions"><button id="selectAll">全选／取消</button><button id="download" class="primary">下载所选视频</button></div></div></section>
+<section id="tasks" hidden><div class="task-toolbar"><div class="heading"><h2 id="taskHeading">进行中／未完成</h2><select id="taskFilter"><option value="all">全部未完成</option><option value="running">正在下载</option><option value="queued">等待下载</option><option value="paused">已暂停</option><option value="error">失败</option><option value="canceled">已取消</option></select></div>
+<div id="batchActions" class="batch-actions"><button id="startAll" class="primary">全部开始</button><button id="pauseAll">全部暂停</button><button id="cancelAll">全部取消</button><button id="restoreAll">全部恢复</button></div><p class="muted">批量操作作用于所有标签的下载任务；取消保留已有文件。退出后可恢复未完成任务。</p></div><div id="jobs"></div></section>
+<footer><span>下载目录</span><input id="directory" readonly><button id="folderOpen">打开下载目录</button><button id="chooseFolder">选择目录…</button><label>分片并发 <input id="threads" type="number" min="1" max="8" value="4"></label></footer>
+<dialog id="settingsDialog"><h2>设置</h2><label>重试次数 <input id="retryCount" type="number" min="0" max="20" step="1" value="10"></label><label>速度单位 <select id="speedUnit"><option value="MiB">MiB/s</option><option value="MB">MB/s</option><option value="Mbps">Mbps</option></select></label><label>显示语言 <select id="language"><option value="zh">中文</option><option value="en">English</option></select></label><button id="saveSettings" class="primary">保存</button><button id="closeSettings">关闭</button></dialog><div id="notice">就绪 · 网页内如需登录或验证，请正常完成后再捕获。</div></main><script src="i18n.js"></script><script src="renderer.js"></script></body></html>

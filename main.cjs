@@ -52,12 +52,18 @@ function activateTab(id){
 function createTab(url='about:blank'){
   const child=new WebContentsView({webPreferences:{partition:'persist:streamcatch-browser',nodeIntegration:false,contextIsolation:true,sandbox:true}});
   const id=child.webContents.id;const t={id,view:child,title:'新标签页',url,filters:filterConfig()};tabs.set(id,t);win.contentView.addChildView(child);child.setVisible(false);attachBrowser(child.webContents);
-  const navigated=url=>{t.url=url;if(isHTTP(url)){config.lastPage=url;saveConfig();}if(activeTab===id)send('navigation',{url});announceTabs();};
+  const navigated=url=>{t.url=url;if(activeTab===id)send('navigation',{url});announceTabs();};
   child.webContents.on('did-navigate',(_e,url)=>navigated(url));
   child.webContents.on('did-navigate-in-page',(_e,url,main)=>{if(main)navigated(url);});
   child.webContents.on('page-title-updated',(_e,title)=>{t.title=title||'新标签页';announceTabs();});
   child.webContents.on('did-fail-load',(_e,code,message,_url,main)=>{if(main&&code!==-3)send('notice','网页加载失败：'+message);});
   activateTab(id);void child.webContents.loadURL(url).catch(error=>send('notice',error.message));return id;
+}
+function navigate(url){
+  const current=tabs.get(activeTab);
+  if(!current||current.url!=='about:blank'){createTab(url);return;}
+  current.url=url;announceTabs();
+  void current.view.webContents.loadURL(url).catch(error=>send('notice',error.message));
 }
 function closeTab(id){
   const target=tabs.get(id);if(!target)return;tabs.delete(id);win.contentView.removeChildView(target.view);target.view.webContents.close();
@@ -131,6 +137,7 @@ app.whenReady().then(async () => {
   if (fs.existsSync(legacyUserData)) app.setPath('userData', legacyUserData);
   configFile = path.join(app.getPath('userData'), 'settings.json');
   try { config = {...config, ...JSON.parse(fs.readFileSync(configFile, 'utf8'))}; } catch {}
+  if(Object.hasOwn(config,'lastPage')){delete config.lastPage;saveConfig();}
   if(config.sizeUnit!=='MB'){config.minimum=(Number(config.minimum)||0)*1.048576;config.sizeUnit='MB';saveConfig();}
   config.directory ||= path.join(app.getPath('downloads'), 'VidPorter');
   browserSession = session.fromPartition('persist:streamcatch-browser');
@@ -142,7 +149,7 @@ app.whenReady().then(async () => {
   installCapture();
   let ffmpeg = require('ffmpeg-static');
   if (app.isPackaged) ffmpeg = ffmpeg.replace('app.asar', 'app.asar.unpacked');
-  engine = new Engine({fetch: (url, options) => chromiumFetch(net, browserSession, url, options), directory: config.directory,maxRetries:config.retryCount??10, queueFile: path.join(app.getPath('userData'), 'unfinished-downloads.json'),
+  engine = new Engine({fetch: (url, options) => chromiumFetch(net, browserSession, url, options), directory: config.directory,maxRetries:config.retryCount??10, queueFile: path.join(app.getPath('userData'), 'unfinished-downloads.json'), completedDirectory: path.join(app.getPath('userData'), 'completed-downloads'),
     ffmpeg, notify: jobs => send('jobs', jobs), lookupHeaders: url => headersByURL.get(url)});
   ipcMain.handle('command', async (event, command, payload) => {
     if (!trusted(event)) throw new Error('无效的消息来源。');
@@ -155,7 +162,7 @@ app.whenReady().then(async () => {
       case 'navigate': {
         let url = String(payload).trim(); if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
         if (!isHTTP(url)) throw new Error('请输入 HTTP / HTTPS 网址。');
-        createTab(url); return;
+        navigate(url); return;
       }
       case 'bounds': {
         const [width, height] = win.getContentSize();

@@ -49,7 +49,7 @@ async function setup(t){
   });
   await new Promise(r=>server.listen(0,'127.0.0.1',r));
   const base='http://127.0.0.1:'+server.address().port;
-  const engine=new Engine({retryWait:async()=>{},directory:folder,ffmpeg,notify:()=>{},fetch:(url,opts)=>{calls.push({url,opts});return fetch(url,opts);}});
+  const engine=new Engine({retryWait:async()=>{},directory:folder,completedDirectory:path.join(folder,'app-data'),ffmpeg,notify:()=>{},fetch:(url,opts)=>{calls.push({url,opts});return fetch(url,opts);}});
   t.after(async()=>{engine.shutdown();await until(()=>!engine.active);server.closeAllConnections();await new Promise(r=>server.close(r));await fs.rm(folder,{recursive:true,force:true,maxRetries:10,retryDelay:100});});
   return {engine,folder,base,ranges,calls};
 }
@@ -58,6 +58,7 @@ test('plain download is byte-identical and uses credentials include',async t=>{
   await until(()=>engine.jobs[0].state==='done'||engine.jobs[0].state==='error');
   assert.equal(engine.jobs[0].state,'done',engine.jobs[0].message);
   assert.deepEqual(await fs.readFile(engine.jobs[0].output),data);assert.equal(calls[0].opts.credentials,'include');
+  await until(()=>!engine.active);assert.ok(!(await fs.readdir(engine.directory)).some(n=>n.endsWith('.json')||n.endsWith('.tmp')));
 });
 test('captured authorization is preserved for the same origin',async t=>{
   const {engine,base}=await setup(t);engine.add({url:base+'/protected',kind:'VIDEO',title:'test',headers:{Authorization:'demo'}});
@@ -66,6 +67,7 @@ test('captured authorization is preserved for the same origin',async t=>{
 test('pause and resume requests a validated byte range',async t=>{
   const {engine,base,ranges}=await setup(t);const id=engine.add({url:base+'/slow',kind:'VIDEO',title:'test',headers:{}});
   await until(()=>engine.jobs[0].done>200000);engine.control(id,'pause');await until(()=>engine.jobs[0].state==='paused');
+  assert.ok((await fs.readdir(engine.directory)).some(n=>n.endsWith('.json')));
   const saved=engine.jobs[0].done;engine.control(id,'resume');await until(()=>['done','error'].includes(engine.jobs[0].state));
   assert.equal(engine.jobs[0].state,'done',engine.jobs[0].message);assert.deepEqual(await fs.readFile(engine.jobs[0].output),data);
   assert.ok(ranges.some(r=>r.range===`bytes=${saved}-`&&r.ifRange==='"v1"'));
@@ -83,7 +85,7 @@ test('cancel never marks partial output complete',async t=>{
 });
 test('HTTP 403 stays an explicit error',async t=>{
   const {engine,base}=await setup(t);engine.add({url:base+'/blocked',kind:'VIDEO',title:'test',headers:{}});
-  await until(()=>!engine.active);assert.equal(engine.jobs[0].state,'error');assert.match(engine.jobs[0].message,/403/);
+  await until(()=>!engine.active);assert.equal(engine.jobs[0].state,'error');assert.match(engine.jobs[0].message,/403/);assert.ok((await fs.readdir(engine.directory)).some(n=>n.endsWith('.json')));
 });
 for(const endpoint of ['/hls/index.m3u8','/hls/encrypted.m3u8','/redirect']){
   test('real HLS merge '+endpoint,{skip:!hasFFmpeg},async t=>{
@@ -94,13 +96,14 @@ for(const endpoint of ['/hls/index.m3u8','/hls/encrypted.m3u8','/redirect']){
     const check=spawnSync(ffmpeg,['-v','error','-i',engine.jobs[0].output,'-f','null','-'],{windowsHide:true});
     assert.equal(check.status,0,check.stderr.toString());
     assert.ok(calls.every(c=>c.opts.credentials==='include'));
+    assert.ok(!(await fs.readdir(engine.directory)).some(n=>n.endsWith('.json')||n.endsWith('_parts')));
   });
 }
 test('new engine resumes saved file even when title changes',async t=>{
  const {engine,folder,base,ranges}=await setup(t);const resource={url:base+'/slow',kind:'VIDEO',title:'first',headers:{}};
  const id=engine.add(resource);await until(()=>engine.jobs[0].done>100000);engine.control(id,'pause');await until(()=>!engine.active);
  const saved=engine.jobs[0].done;
- const next=new Engine({retryWait:async()=>{},directory:folder,ffmpeg,notify:()=>{},fetch});
+ const next=new Engine({retryWait:async()=>{},directory:folder,completedDirectory:path.join(folder,'app-data'),ffmpeg,notify:()=>{},fetch});
  try{next.add({...resource,title:'changed'});await until(()=>!next.active);assert.equal(next.jobs[0].state,'done',next.jobs[0].message);assert.deepEqual(await fs.readFile(next.jobs[0].output),data);assert.ok(ranges.some(r=>r.range===`bytes=${saved}-`));}
  finally{next.shutdown();await until(()=>!next.active);}
 });
@@ -109,9 +112,30 @@ test('HLS restart reuses verified segments and skips completed output', {skip:!h
  engine.fetch=(url,opts)=>url.endsWith('segment01.ts')?Promise.resolve(new Response('',{status:403})):original(url,opts);
  const resource={url:base+'/hls/index.m3u8',kind:'HLS',title:'checkpoint',headers:{}};
  engine.add(resource,1);await until(()=>!engine.active);assert.equal(engine.jobs[0].state,'error');
- const requested=[];const next=new Engine({retryWait:async()=>{},directory:folder,ffmpeg,notify:()=>{},fetch:(url,opts)=>{requested.push(url);return fetch(url,opts);}});
+ const requested=[];const next=new Engine({retryWait:async()=>{},directory:folder,completedDirectory:path.join(folder,'app-data'),ffmpeg,notify:()=>{},fetch:(url,opts)=>{requested.push(url);return fetch(url,opts);}});
  try{next.add(resource,1);await until(()=>!next.active);assert.equal(next.jobs[0].state,'done',next.jobs[0].message);assert.ok(!requested.some(u=>u.endsWith('segment00.ts')));
- const done=new Engine({retryWait:async()=>{},directory:folder,ffmpeg,notify:()=>{},fetch:()=>{throw new Error('must not download completed output');}});
+ const done=new Engine({retryWait:async()=>{},directory:folder,completedDirectory:path.join(folder,'app-data'),ffmpeg,notify:()=>{},fetch:()=>{throw new Error('must not download completed output');}});
  done.add(resource);await until(()=>!done.active);assert.equal(done.jobs[0].state,'done');done.shutdown();}
  finally{next.shutdown();await until(()=>!next.active);}
+});
+
+test('legacy completed record is migrated without redownloading or deleting unrelated JSON',async t=>{
+ const {engine,folder,base}=await setup(t);const checkpoint=require('../lib/checkpoint.cjs');
+ const resource={url:base+'/video',kind:'VIDEO',title:'legacy'};
+ const job={directory:folder,resource,stem:'legacy',output:''};await checkpoint.prepare(job);
+ job.output=path.join(folder,'legacy.mp4');await fs.writeFile(job.output,data);await checkpoint.save(job);
+ const unrelated=path.join(folder,'user.json');await fs.writeFile(unrelated,'{"keep":true}');
+ engine.fetch=()=>{throw Error('must not redownload');};engine.add(resource);await until(()=>!engine.active);
+ assert.equal(engine.jobs[0].state,'done',engine.jobs[0].message);
+ assert.equal(engine.jobs[0].output,job.output);await assert.rejects(fs.stat(job.checkpoint),{code:'ENOENT'});
+ assert.equal(await fs.readFile(unrelated,'utf8'),'{'+'"keep":true}');
+ assert.deepEqual(await fs.readFile(job.output),data);
+});
+test('completed record cleanup failure does not retry or fail a downloaded video',async t=>{
+ const {engine,folder,base,calls}=await setup(t);
+ await fs.writeFile(engine.completedDirectory,'not a directory');
+ engine.add({url:base+'/video',kind:'VIDEO',title:'cleanup'});await until(()=>!engine.active);
+ assert.equal(engine.jobs[0].state,'done');assert.match(engine.jobs[0].message,/续传记录未能清理/);
+ assert.equal(calls.length,1);assert.deepEqual(await fs.readFile(engine.jobs[0].output),data);
+ assert.ok((await fs.readdir(folder)).some(n=>n.endsWith('.json')));
 });

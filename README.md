@@ -2,7 +2,7 @@
 
 **Move videos anywhere.**
 
-当前版本 / Current version: **v1.0.0**
+当前版本 / Current version: **v1.0.1**
 
 ## 中文
 
@@ -12,11 +12,12 @@ VidPorter 是基于 Electron 和 Chromium 的桌面视频下载软件。在内�
 
 ### 功能
 
-- 多标签浏览器，每个标签独立显示捕获到的资源。
+- 多标签浏览器，每个标签独立显示捕获到的资源。启动时显示空白标签，不自动恢复上次网页；空白标签输入网址时直接在当前标签打开。
 - 下载普通视频文件和受支持的点播 HLS 流。
 - 显示下载进度，并支持暂停、继续、取消、重试和批量操作。
 - 可设置下载目录、来源与网址筛选条件、速度单位、重试次数和界面语言。
 - 保存未完成任务；同一网址可复用已验证的部分下载内容。
+- 视频成功下载后，清理下载目录中的对应续传 JSON；已完成记录保存至应用数据目录。暂停或失败时保留续传记录。
 
 可以识别部分 DASH 资源，但目前不能下载 DASH。不支持直播、DRM 和部分高级 HLS 格式。网站认证、资源网址过期或服务器限制可能导致下载失败。
 
@@ -26,7 +27,7 @@ VidPorter 是基于 Electron 和 Chromium 的桌面视频下载软件。在内�
 
 ### 安装与 Windows 发布版
 
-Windows x64 安装程序为 `VidPorter-v1.0.0-Windows-x64-Setup.exe`，是可直接运行的 `.exe` 安装包，会创建 VidPorter 开始菜单入口和桌面快捷方式。另有无需安装的 `VidPorter-v1.0.0-Windows-x64-Portable.exe`。请从 [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases/tag/v1.0.0) 下载。构建产物位于本地 `dist/`，不提交到 Git。安装包尚未进行代码签名，Windows 可能显示发布者提示。
+Windows x64 安装程序为 `VidPorter-v1.0.1-Windows-x64-Setup.exe`，是可直接运行的 `.exe` 安装包，会创建 VidPorter 开始菜单入口和桌面快捷方式。另有无需安装的 `VidPorter-v1.0.1-Windows-x64-Portable.exe`。请从 [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases/tag/v1.0.1) 下载。构建产物位于本地 `dist/`，不提交到 Git。安装包尚未进行代码签名，Windows 可能显示发布者提示。
 
 ### 开发与要求
 
@@ -53,7 +54,7 @@ npm run build
 
 ### 版本
 
-`package.json` 中的 `version` 是程序版本的唯一来源，目前为 `1.0.0`。界面、窗口标题和 Windows 元数据从该版本读取；Git tag 为 `v1.0.0`。
+`package.json` 中的 `version` 是程序版本的唯一来源，目前为 `1.0.1`。界面、窗口标题和 Windows 元数据从该版本读取；Git tag 为 `v1.0.1`。
 
 ### 免责声明
 
@@ -71,11 +72,12 @@ VidPorter is a desktop video downloading application powered by Electron and Chr
 
 ### Features
 
-- Multi-tab browser with a separate resource list for each tab.
+- Multi-tab browser with a separate resource list for each tab. Each launch starts with a blank tab, without restoring the last page. Entering a URL in a blank tab opens it in that tab.
 - Direct downloads of ordinary video files and supported on-demand HLS streams.
 - Progress monitoring, pause, resume, cancel, retry, and batch controls.
 - Configurable download folder, source and URL filters, speed units, retry count, and interface language.
 - Saved unfinished tasks and verified partial-file reuse for matching URLs.
+- After a successful download, resume JSON sidecars are removed from the download folder and completed records are kept in application data. Paused or failed downloads retain their resume records.
 
 Some DASH resources may be identified but cannot be downloaded. Live streams, DRM, and some advanced HLS variants are unsupported. Site authentication, expired URLs, or server restrictions may prevent downloads.
 
@@ -85,7 +87,7 @@ Screenshots have not yet been added.
 
 ### Installation and Windows Release
 
-The Windows x64 installer is `VidPorter-v1.0.0-Windows-x64-Setup.exe`, a runnable `.exe` setup program that creates VidPorter Start menu and desktop shortcuts. `VidPorter-v1.0.0-Windows-x64-Portable.exe` runs without installation. Download them from [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases/tag/v1.0.0). Build outputs are kept locally in `dist/`, outside Git history. The binaries are not code signed, so Windows may display a publisher warning.
+The Windows x64 installer is `VidPorter-v1.0.1-Windows-x64-Setup.exe`, a runnable `.exe` setup program that creates VidPorter Start menu and desktop shortcuts. `VidPorter-v1.0.1-Windows-x64-Portable.exe` runs without installation. Download them from [GitHub Releases](https://github.com/Daniel-Cpz/VidPorter/releases/tag/v1.0.1). Build outputs are kept locally in `dist/`, outside Git history. The binaries are not code signed, so Windows may display a publisher warning.
 
 ### Development and Requirements
 
@@ -112,7 +114,7 @@ The files are written to `dist/`. A first build may need to download Electron an
 
 ### Version
 
-The `version` field in `package.json` is the single application version source, currently `1.0.0`. The UI, window title, and Windows metadata read from it; the Git tag is `v1.0.0`.
+The `version` field in `package.json` is the single application version source, currently `1.0.1`. The UI, window title, and Windows metadata read from it; the Git tag is `v1.0.1`.
 
 ### Disclaimer
 

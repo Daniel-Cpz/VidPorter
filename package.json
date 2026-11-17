@@ -1,6 +1,6 @@
 {
   "name": "vidporter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "VidPorter — Move videos anywhere.",
   "author": "Daniel-Cpz",
   "license": "MIT",
@@ -36,7 +36,10 @@
       "node_modules/**"
     ],
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "icon.ico",
       "signAndEditExecutable": true
     },

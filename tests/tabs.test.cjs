@@ -1,6 +1,6 @@
 const test=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const path=require('node:path');const {createRequire}=require('node:module');const {EventEmitter}=require('node:events');
 test('tabs isolate same-URL resources, filters and closing a tab',()=>{
- let serial=0;class View{constructor(){this.webContents=new EventEmitter();Object.assign(this.webContents,{id:++serial,setWindowOpenHandler(){},loadURL:async()=>{},close(){},isDestroyed:()=>false});}setVisible(v){this.visible=v;}setBounds(){}}
+ let serial=0;class View{constructor(){this.webContents=new EventEmitter();Object.assign(this.webContents,{id:++serial,setWindowOpenHandler(){},loadURL:async url=>{this.webContents.loadedURL=url;},close(){},isDestroyed:()=>false});}setVisible(v){this.visible=v;}setBounds(){}}
  const electron={app:{whenReady:()=>({then(){}}),on(){}},WebContentsView:View};
  const filename=path.join(__dirname,'../main.cjs');const native=createRequire(filename);const ctx=vm.createContext({require:name=>name==='electron'?electron:native(name),console,setTimeout,clearTimeout,URL,AbortController,Buffer,__dirname:path.dirname(filename)});
  vm.runInContext(fs.readFileSync(filename,'utf8'),ctx);
@@ -12,4 +12,11 @@ test('tabs isolate same-URL resources, filters and closing a tab',()=>{
  vm.runInContext('activateTab(first)',ctx);assert.equal(vm.runInContext('config.minimum',ctx),50);assert.equal(vm.runInContext('publicResources()[0].title',ctx),'one');
  vm.runInContext('closeTab(first)',ctx);assert.equal(vm.runInContext('publicResources()[0].title',ctx),'two');assert.equal(vm.runInContext('resources.size',ctx),1);
  vm.runInContext('closeTab(second)',ctx);assert.equal(vm.runInContext('tabs.size',ctx),1);assert.equal(vm.runInContext('publicResources().length',ctx),0);
+ const blankId=vm.runInContext('activeTab',ctx);
+ assert.equal(vm.runInContext('tabs.get(activeTab).url',ctx),'about:blank');
+ vm.runInContext("navigate('https://entered.test')",ctx);
+ assert.equal(vm.runInContext('activeTab',ctx),blankId);assert.equal(vm.runInContext('tabs.size',ctx),1);
+ assert.equal(vm.runInContext('view.webContents.loadedURL',ctx),'https://entered.test');
+ vm.runInContext("navigate('https://another.test')",ctx);assert.equal(vm.runInContext('tabs.size',ctx),2);
+ assert.equal(vm.runInContext('tabs.get('+blankId+').url',ctx),'https://entered.test');
 });

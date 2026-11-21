@@ -82,6 +82,7 @@ function drawJobs(){
     const foot=document.createElement('div');foot.className='job-foot';
     const message=document.createElement('div');message.className='job-message';message.textContent=bytes(j.done)+(j.speed?' · '+speedText(j.speed):'')+' · '+(j.message||'等待下载');
     const controls=document.createElement('div');controls.className='job-controls';
+    if(!j.forceMerging){
     if(['running','queued'].includes(j.state))controls.append(button('暂停',()=>command('job',{id:j.id,action:'pause'})));
     if(['paused','error'].includes(j.state))controls.append(button('继续',()=>command('job',{id:j.id,action:'resume'})));
     if(!['done','canceled'].includes(j.state))controls.append(button('取消',()=>command('job',{id:j.id,action:'cancel'})));
@@ -89,6 +90,9 @@ function drawJobs(){
       controls.append(button('恢复下载',()=>command('job',{id:j.id,action:'restore'})));
       const remove=button('彻底删除',async()=>{remove.disabled=true;try{if(await command('delete-task',j.id))notice('已删除任务及未完成文件。');}finally{remove.disabled=false;}});remove.className='danger';remove.title='删除任务、未完成分片和续传记录，无法恢复';controls.append(remove);
     }
+    if(j.kind==='HLS'&&['paused','error','canceled'].includes(j.state))controls.append(button('强制合并',()=>command('force-merge',j.id)));
+    }else{const merging=button('正在强制合并…',()=>{});merging.disabled=true;controls.append(merging);}
+    if(j.partialOutput)controls.append(button('播放不完整视频',()=>command('open-partial',j.id)));
     if(j.state==='done')controls.append(button('播放文件',()=>command('open-result',j.id)));
     foot.append(message,controls);card.append(head,progress,fraction,foot);fragment.append(card);
   }

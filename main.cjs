@@ -212,6 +212,16 @@ app.whenReady().then(async () => {
         }
         return;
       }
+      case 'force-merge': {
+        const result=dialog.showMessageBoxSync(win,{type:'warning',buttons:config.language==='en'?['Merge','Cancel']:['强制合并','取消'],defaultId:1,cancelId:1,
+          message:config.language==='en'?'Merge available HLS segments into a separate incomplete video? Missing segments may cause jumps or audio/video desynchronization. Resume data will be kept.':'将已有 HLS 分片另存为不完整视频？缺失片段可能导致跳帧或音画不同步。分片与续传数据将保留。'});
+        if(result!==0)return;
+        return engine.forceMerge(payload);
+      }
+      case 'open-partial': {
+        const job=engine.jobs.find(j=>j.id===payload);
+        if(job?.partialOutput)return shell.openPath(job.partialOutput);return;
+      }
       case 'delete-task': await engine.deleteCanceled(payload);return true;
       case 'job': if (['pause', 'resume', 'cancel', 'restore'].includes(payload?.action)) engine.control(payload.id, payload.action); return;
       case 'open-result': {
@@ -224,9 +234,9 @@ app.whenReady().then(async () => {
     }
   });
   win.on('close', event => {
-    if (engine.active) {
+    if (engine.active || engine.jobs.some(j=>j.forceMerging)) {
       const response = dialog.showMessageBoxSync(win, {type: 'question', buttons: ['继续下载', '退出'], defaultId: 0,
-        message: '当前正在下载。退出后将保存未完成任务，下次启动可继续。确定退出？'});
+        message: '当前正在下载或合并。退出会停止操作，已有续传数据会保留。确定退出？'});
       if (response === 0) { event.preventDefault(); return; }
     }
     engine.shutdown();

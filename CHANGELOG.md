@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0] - 2026-11-21
+
+### Added
+
+- Force merge verified local HLS segments from paused, failed, or canceled tasks into a separate incomplete MKV video.
+- Preserve source segments and resume records after merging; keep the task unfinished and allow later full download.
+- Confirmation explaining missing content and possible audio/video desynchronization.
+- Play incomplete output from the task list, including after restarting the application.
+- Prevent resume, deletion, or duplicate operations from changing shared segments during a force merge.
+
 ## [1.0.1] - 2026-11-18
 
 ### Fixed
